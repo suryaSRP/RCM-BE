@@ -1,18 +1,27 @@
 const config = require("../config/auth.config");
 const db = require("../models");
-const User = db.user;
-const Role = db.role;
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var generic = new Schema({});
+var connectDb = require("../../clientsdb");
+var libs = require("../common/libs");
+var app = libs.express();
+// const User = db.user;
+// const Role = db.role;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
+  console.log("singnup_____")
+  let db = connectDb(req.headers['clientDbId'].split(";")[0])
+  db.models = {}
+  let User = db.model("User", generic);
   const user = new User({
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8)
   });
-
   user.save((err, user) => {
     if (err) {
       res.status(500).send({ message: err });
@@ -42,20 +51,26 @@ exports.signup = (req, res) => {
         }
       );
     } else {
+      console.log("hited saved user and checking for error")
       Role.findOne({ name: "user" }, (err, role) => {
         if (err) {
+          console.log("error_on_role")
           res.status(500).send({ message: err });
           return;
         }
 
+        console.log("resp_on_role")
         user.roles = [role._id];
         user.save(err => {
           if (err) {
+
+            console.log("error_on_role_save")
             res.status(500).send({ message: err });
             return;
           }
+          console.log("_on_role_resp")
 
-          res.send({ message: "User was registered successfully!" });
+          res.status(200).send({ message: "User was registered successfully!" });
         });
       });
     }
@@ -63,47 +78,49 @@ exports.signup = (req, res) => {
 };
 
 exports.signin = (req, res) => {
+  var bodyData = req.body
+  console.log(req.body, "signin hitted", req.body.password)
+  req = { headers: { "clientDbId": "BaseTest;surya@gmail.com;1" } }
+  let db = connectDb(req.headers['clientDbId'].split(";")[0])
+  db.models = {}
+  let User = db.model("User", generic);
   User.findOne({
-    username: req.body.username
+    username: bodyData.userID
   })
     .populate("roles", "-__v")
-    .exec((err, user) => {
+    .exec((err, userData) => {
       if (err) {
         res.status(500).send({ message: err });
         return;
-      }
-
-      if (!user) {
+      } else if (!userData) {
         return res.status(404).send({ message: "User Not found." });
-      }
+      } else {
+        var userInput = JSON.parse(JSON.stringify(userData))
+        var passwordIsValid = bcrypt.compareSync(bodyData.password, userInput.password);
 
-      var passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
+        if (!passwordIsValid) {
+          return res.status(401).send({
+            accessToken: null,
+            message: "Invalid Password!"
+          });
+        }
 
-      if (!passwordIsValid) {
-        return res.status(401).send({
-          accessToken: null,
-          message: "Invalid Password!"
+        var token = jwt.sign({ id: userInput.id }, config.secret, {
+          expiresIn: 86400 // 24 hours
+        });
+
+        var authorities = [];
+
+        for (let i = 0; i < userInput.roles.length; i++) {
+          authorities.push("ROLE_" + userInput.roles[i].name.toUpperCase());
+        }
+        res.status(200).send({
+          id: userInput._id,
+          username: userInput.username,
+          email: userInput.email,
+          roles: authorities,
+          accessToken: token
         });
       }
-
-      var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 86400 // 24 hours
-      });
-
-      var authorities = [];
-
-      for (let i = 0; i < user.roles.length; i++) {
-        authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
-      }
-      res.status(200).send({
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        roles: authorities,
-        accessToken: token
-      });
     });
 };
