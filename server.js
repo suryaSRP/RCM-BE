@@ -14,6 +14,8 @@ const { MongoClient } = require("mongodb");
 var mongoose = require("mongoose");
 var port = 5000;
 var connectDb = require("./clientsdb");
+var Schema = mongoose.Schema;
+var generic = new Schema({});
 
 // const app = express();
 
@@ -29,8 +31,8 @@ app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST");
   // Request headers you wish to allow
   res.setHeader(
-      "Access-Control-Allow-Headers",
-      "x-timezone-offset,admin-owner,admin-id,lang_id,ee_id,clientsid,X-Requested-With,x-access-token,Content-Type,Authorization,role,prsn_intn_id,ee_id,access_orgs,access_company,job_access"
+    "Access-Control-Allow-Headers",
+    "x-timezone-offset,admin-owner,admin-id,lang_id,ee_id,clientsid,X-Requested-With,x-access-token,Content-Type,Authorization,role,prsn_intn_id,ee_id,access_orgs,access_company,job_access"
   );
   // Set to true if you need the website to include cookies in the requests sent
   // to the API (e.g. in case you use sessions)
@@ -38,7 +40,7 @@ app.use(function (req, res, next) {
 
   res.setHeader("Access-Control-Allow-Credentials", true);
   // Pass to next layer of middleware
-  req.headers['admin-owner']=req.headers['admin-owner']?req.headers['admin-owner']:req.headers['clientsid']?req.headers['clientsid'].split(";")[1]:null;
+  req.headers['admin-owner'] = req.headers['admin-owner'] ? req.headers['admin-owner'] : req.headers['clientsid'] ? req.headers['clientsid'].split(";")[1] : null;
   next();
 });
 
@@ -71,26 +73,26 @@ var mongoDB = 'mongodb://localhost:27017/BaseTest';
 var db = mongoose.connection;
 console.log('Surya: mongoose.connection.readyState', mongoose.connection.readyState)
 db.on('connecting', function () {
-    console.log('connecting to MongoDB...');
+  console.log('connecting to MongoDB...');
 });
 
 db.on('error', function (error) {
-    console.error('Error in MongoDb connection: ' + error);
-    mongoose.disconnect();
+  console.error('Error in MongoDb connection: ' + error);
+  mongoose.disconnect();
 });
 db.on('connected', function () {
-    console.log('MongoDB connected!');
+  console.log('MongoDB connected!');
 });
 db.once('open', function () {
-    console.log('MongoDB connection opened!');
+  console.log('MongoDB connection opened!');
 });
 db.on('reconnected', function () {
-    console.log('MongoDB reconnected!');
+  console.log('MongoDB reconnected!');
 });
 db.on('disconnected', function () {
-    console.log('MongoDB disconnected!');
-    // mongoose.connect(config.getQualifiedDBUrlNoClient(), { server: { auto_reconnect: true } });
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
+  console.log('MongoDB disconnected!');
+  // mongoose.connect(config.getQualifiedDBUrlNoClient(), { server: { auto_reconnect: true } });
+  mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 });
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 // console.log(config.getQualifiedDBUrlNoClient(),"config.getQualifiedDBUrlNoClient()")
@@ -98,13 +100,28 @@ mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Surya application." });
+  res.json({ message: "Welcome to Surya New application." });
 });
 
 app.get("/getClientDtls/:clientId", (req, res) => {
+  console.log("hitted clientDtls")
   let db = connectDb("commonDb")
   db.models = {}
-  db.clientDetails
+  let clientDetails = db.model("clientDetails", Schema({}, {
+    collection: "clientDetails"
+  }));
+  clientDetails.find({
+    clientCd: req.params.clientId,
+    data_stat_cd: 'A'
+  }).exec((err, clientData) => {
+    if (err) {
+      res.err({ data: err, message: "db error" })
+    } else if (clientData.length > 0) {
+      res.send({ data: clientData, message: "client Data Received" })
+    } else {
+      res.send({ data: [], message: "No User Found" })
+    }
+  })
 });
 
 // routes

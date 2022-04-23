@@ -6,6 +6,8 @@ var generic = new Schema({});
 var connectDb = require("../../clientsdb");
 var libs = require("../common/libs");
 var app = libs.express();
+let userDb=require("../models/user")
+var UserSchema = new Schema(userDb);
 // const User = db.user;
 // const Role = db.role;
 
@@ -13,16 +15,18 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  console.log("singnup_____")
-  let db = connectDb(req.headers['clientDbId'].split(";")[0])
+  console.log("singnup_____",req.body)
+  var bodyData = req.body
+  let db = connectDb("SI01")
   db.models = {}
-  let User = db.model("User", generic);
+  let User = db.model("User", UserSchema);
   const user = new User({
-    username: req.body.username,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8)
+    username: bodyData.name,
+    email: bodyData.email,
+    password: bcrypt.hashSync(bodyData.password, 8)
   });
   user.save((err, user) => {
+    console.log(user,"user save info")
     if (err) {
       res.status(500).send({ message: err });
       return;
@@ -52,6 +56,9 @@ exports.signup = (req, res) => {
       );
     } else {
       console.log("hited saved user and checking for error")
+      let db = connectDb("SI01")
+      db.models = {}
+      let Role = db.model("Role", generic);
       Role.findOne({ name: "user" }, (err, role) => {
         if (err) {
           console.log("error_on_role")
@@ -70,7 +77,7 @@ exports.signup = (req, res) => {
           }
           console.log("_on_role_resp")
 
-          res.status(200).send({ message: "User was registered successfully!" });
+          res.status(200).send({result:"success", message: "User was registered successfully!" });
         });
       });
     }
@@ -114,13 +121,13 @@ exports.signin = (req, res) => {
         for (let i = 0; i < userInput.roles.length; i++) {
           authorities.push("ROLE_" + userInput.roles[i].name.toUpperCase());
         }
-        res.status(200).send({
+        res.status(200).send({result:{
           id: userInput._id,
           username: userInput.username,
           email: userInput.email,
           roles: authorities,
           accessToken: token
-        });
+        },message:"Login Success"});
       }
     });
 };
