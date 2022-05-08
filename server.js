@@ -67,7 +67,7 @@ app.use(express.urlencoded({ extended: true }));
 //     process.exit();
 //   });
 
-var mongoDB = 'mongodb://localhost:27017/BaseTest';
+var mongoDB = 'mongodb://localhost:27017/';
 
 //Get the default connection
 var db = mongoose.connection;
@@ -127,6 +127,7 @@ app.get("/getClientDtls/:clientId", (req, res) => {
 // routes
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
+require("./app/routes/baseRoutes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8081;

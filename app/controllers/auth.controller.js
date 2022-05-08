@@ -6,7 +6,7 @@ var generic = new Schema({});
 var connectDb = require("../../clientsdb");
 var libs = require("../common/libs");
 var app = libs.express();
-let userDb=require("../models/user")
+let userDb = require("../models/user")
 var UserSchema = new Schema(userDb);
 // const User = db.user;
 // const Role = db.role;
@@ -15,7 +15,7 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  console.log("singnup_____",req.body)
+  console.log("singnup_____", req.body)
   var bodyData = req.body
   let db = connectDb("SI01")
   db.models = {}
@@ -26,7 +26,7 @@ exports.signup = (req, res) => {
     password: bcrypt.hashSync(bodyData.password, 8)
   });
   user.save((err, user) => {
-    console.log(user,"user save info")
+    console.log(user, "user save info")
     if (err) {
       res.status(500).send({ message: err });
       return;
@@ -77,7 +77,7 @@ exports.signup = (req, res) => {
           }
           console.log("_on_role_resp")
 
-          res.status(200).send({result:"success", message: "User was registered successfully!" });
+          res.status(200).send({ result: "success", message: "User was registered successfully!" });
         });
       });
     }
@@ -86,15 +86,12 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   var bodyData = req.body
-  console.log(req.body, "signin hitted", req.body.password)
-  req = { headers: { "clientDbId": "BaseTest;surya@gmail.com;1" } }
-  let db = connectDb(req.headers['clientDbId'].split(";")[0])
+  let db = connectDb(req.headers['clientsid'].split(";")[0])
   db.models = {}
-  let User = db.model("User", generic);
+  let User = db.model("Users", generic);
   User.findOne({
     username: bodyData.userID
   })
-    .populate("roles", "-__v")
     .exec((err, userData) => {
       if (err) {
         res.status(500).send({ message: err });
@@ -103,6 +100,7 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "User Not found." });
       } else {
         var userInput = JSON.parse(JSON.stringify(userData))
+        console.log(userInput, "userInputuserInputuserInputuserInputuserInputuserInputuserInputuserInput")
         var passwordIsValid = bcrypt.compareSync(bodyData.password, userInput.password);
 
         if (!passwordIsValid) {
@@ -121,13 +119,15 @@ exports.signin = (req, res) => {
         for (let i = 0; i < userInput.roles.length; i++) {
           authorities.push("ROLE_" + userInput.roles[i].name.toUpperCase());
         }
-        res.status(200).send({result:{
-          id: userInput._id,
-          username: userInput.username,
-          email: userInput.email,
-          roles: authorities,
-          accessToken: token
-        },message:"Login Success"});
+        res.status(200).send({
+          result: {
+            id: userInput._id,
+            username: userInput.username,
+            email: userInput.email,
+            roles: userInput.roles,
+            accessToken: token
+          }, message: "Login Success"
+        });
       }
     });
 };

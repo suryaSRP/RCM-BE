@@ -1,6 +1,6 @@
 module.exports = {
   HOST: "localhost",
   PORT: 27017,
-  DB: "BaseTest",
+  // DB: "BaseTest",
   common:"commonDb"
 };
