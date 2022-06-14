@@ -43,13 +43,6 @@ module.exports = {
         }))
     },
     prsnMenuDtls: (req, res) => {
-        
-        // console.log(req.headers,"requested headers")
-        // req = {
-        //     headers: {
-        //         clientsid: "SI01;surya@ambu.com;1"
-        //     }
-        // }
         baseFileController.companyWithOrgDetails(req, res, ((err, resp) => {
             if (err) {
                 console.log("Error", "baseMiddleware", "prsnMenuDtls", err)
@@ -59,6 +52,12 @@ module.exports = {
                 res.send(resp)
             }
         }))
-    }
+    },
+    createMode: (req, res) => {
+        baseFileController.createActionModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "createMode", "response received")
+            res.send(resp)
 
+        }))
+    }
 }

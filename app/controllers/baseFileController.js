@@ -88,10 +88,6 @@ module.exports = {
 
     },
     getBaseDetails: (req, res, callback) => {
-
-        // if (res.role !== 1 && res.role !== 2) {
-
-        // }
         let query = { query: { "data_stat_cd": "A" }, project: { "cmpny_id": 1, } }
         baseRepo.companyRepository(req, query, function (err, data) {
             if (err) {
@@ -119,27 +115,27 @@ module.exports = {
                     //             if (orgInfosData.length - 1 == orgInd) {
                     //                 orgLastElem = true
                     //             }
-                                
+
                     // if ((companyData.length - 1 == ind) && (orgLastElem == true)) {
                     //     return callback({ data: companyData, message: "base Details received" })
                     // }
                     //         })
                     //     }
                     // })
-                    baseRepo.orgRepositoryNew(req,orgQuery).then((resp)=>{
-                        console.log(resp,"orginfo details received")
+                    baseRepo.orgRepositoryNew(req, orgQuery).then((resp) => {
+                        console.log(resp, "orginfo details received")
                         let orgInfosData = JSON.parse(JSON.stringify(data))
-                                orgInfosData.forEach((orgData, orgInd) => {
-                                    if (orgData.cmpny_id == cmpdata.cmpny_id) {
-                                        cmpdata["orgInfo"].push(orgData)
-                                    }
-                                    console.log(companyData.length == ind, "123companyData.length == ind_companyData.length == ind", companyData.length, ind)
-                                    console.log(orgInfosData.length-1 == orgInd, "123companyData.length == ind_companyData.length == ind", orgInfosData.length, orgInd)
-                                    if (orgInfosData.length - 1 == orgInd) {
-                                        orgLastElem = true
-                                    }
-                                    
-                                })
+                        orgInfosData.forEach((orgData, orgInd) => {
+                            if (orgData.cmpny_id == cmpdata.cmpny_id) {
+                                cmpdata["orgInfo"].push(orgData)
+                            }
+                            console.log(companyData.length == ind, "123companyData.length == ind_companyData.length == ind", companyData.length, ind)
+                            console.log(orgInfosData.length - 1 == orgInd, "123companyData.length == ind_companyData.length == ind", orgInfosData.length, orgInd)
+                            if (orgInfosData.length - 1 == orgInd) {
+                                orgLastElem = true
+                            }
+
+                        })
                     })
                     console.log(companyData.length - 1 == ind, "companyData.length == ind_companyData.length == ind", companyData.length, ind)
 
@@ -152,6 +148,39 @@ module.exports = {
                 let result = { data: [], msg: "No Company Details found" }
                 return callback(result)
             }
+        })
+    },
+
+    createActionModule: (req, res, callback) => {
+        let actionCollection = req.params.pageToCreate
+        let requestedBody = req.body
+        let requestedHeader=req.headers['clientsid'].split(";")
+        let commonData = {
+            "clnt_intn_id": requestedHeader[0],
+            "data_owner":requestedHeader[1]? requestedHeader[1]: "",
+            "role": requestedHeader[2] ? requestedHeader[2] : 0,
+            "efcv_endt": new Date("2999-12-31"),
+            "org_rsn_cd": "CREATED",
+            "data_stat_cd": "A",
+            "row_ts": new Date()
+        }
+        let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
+        createModeDB.models = {}
+        console.log(`../models/${actionCollection}.js`,"actionCollectionURL")
+        let createDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
+            collection: actionCollection
+        }));
+        requestedBody = {...requestedBody, ...commonData}
+        console.log(requestedBody, "requestedBody_requestedBody_requestedBody_requestedBody")
+        const newCreateAction = new createDB(requestedBody)
+        console.log(newCreateAction, "create_new_action_DB")
+        newCreateAction.save((err,resp)=>{
+if(err){
+    console.log(err,"err_on_createMode")
+    return callback({"message":`create ${actionCollection}'s record failed`,status:"failed",data:err})
+}else{
+    return callback({"message":`create ${actionCollection}'s record sucessfully`,status:"success",data:resp})
+}
         })
     }
 }

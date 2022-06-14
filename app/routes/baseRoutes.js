@@ -15,4 +15,6 @@ module.exports = function (app) {
   app.get("/api/prsnMenuDtls", baseMiddleware.prsnMenuDtls);
   app.get("/api/pstnDtls/:orgId", baseMiddleware.prsnInfoDocuments)
   app.get("/api/:fetchFldsForPage/fetchFlds", fldsMiddleware.fetchFldsForPage)
+  app.get("/api/:page/:fetchID", fldsMiddleware.fetchDataForPage)
+  app.post("/api/:pageToCreate/create",baseMiddleware.createMode)
 };

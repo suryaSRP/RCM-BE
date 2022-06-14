@@ -13,8 +13,8 @@ module.exports = {
 console.log("company repo hitted")
         let db = connectDb(req.headers['clientsid'].split(";")[0])
         db.models = {}
-        let companiesdb = db.model("companies", Schema({}, {
-            collection: "companies"
+        let companiesdb = db.model("companyInfos", Schema({}, {
+            collection: "companyInfos"
         }));
         companiesdb.find(queryProjection.query, queryProjection.project).exec(callback)
     },
@@ -22,12 +22,12 @@ console.log("company repo hitted")
         console.log("company repo hitted")
                 let db = connectDb(req.headers['clientsid'].split(";")[0])
                 db.models = {}
-                let companiesdb = db.model("companies", Schema({}, {
-                    collection: "companies"
+                let companiesdb = db.model("companyInfos", Schema({}, {
+                    collection: "companyInfos"
                 }));
                 companiesdb.aggregate([{
                     $lookup: {
-                           from: "organisationInfo",
+                           from: "orgInfo",
                            localField: "cmpny_id",
                            foreignField: "cmpny_id",
                            as: "orgInfo"
@@ -41,8 +41,8 @@ console.log("company repo hitted")
 
         let db = connectDb(req.headers['clientsid'].split(";")[0])
         db.models = {}
-        let companiesdb = db.model("organisationInfo", Schema({}, {
-            collection: "organisationInfo"
+        let companiesdb = db.model("orgInfo", Schema({}, {
+            collection: "orgInfo"
         }));
         companiesdb.find(queryProjection.query, queryProjection.project).exec(callback)
     },
@@ -50,8 +50,8 @@ console.log("company repo hitted")
         return new Promise((resolve, reject) => {
         let db = connectDb(req.headers['clientsid'].split(";")[0])
         db.models = {}
-        let companiesdb = db.model("organisationInfo", Schema({}, {
-            collection: "organisationInfo"
+        let companiesdb = db.model("orgInfo", Schema({}, {
+            collection: "orgInfo"
         }));
         companiesdb.find(queryProjection.query, queryProjection.project).exec((err,resp)=>{
             if(err){

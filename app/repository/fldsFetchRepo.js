@@ -8,14 +8,26 @@ var app = libs.express();
 var connectDb = require("../../clientsdb");
 var Schema = mongoose.Schema;
 var generic = new Schema({});
-module.exports = {    
+module.exports = {
     pageActionFlds: (req, queryProjection, callback) => {
-        console.log("commonDb repo hitted",queryProjection)
-                let commonDb = connectDb("commonDb")
-                commonDb.models = {}
-                let commonFldsDb = commonDb.model("commonFlds", Schema({}, {
-                    collection: "commonFlds"
-                }));
-                commonFldsDb.find(queryProjection.query, queryProjection.project?queryProjection.project:{}).exec(callback)
-            },
+        let commonDb = connectDb("commonDb")
+        commonDb.models = {}
+        let commonFldsDb = commonDb.model("commonFlds", Schema({}, {
+            collection: "commonFlds"
+        }));
+        commonFldsDb.find(queryProjection.query, queryProjection.project ? queryProjection.project : {}).sort({ seq: 1 }).exec(callback)
+    },
+
+    getFldsData: (req, callback) => {
+        console.log(req.headers['clientsid'], "req.headers['clientsid']_getFldsData", req.params.fetchID, req.params.page)
+        let commonDb = connectDb(req.headers['clientsid'].split(";")[0])
+        commonDb.models = {}
+        let flagDb = commonDb.model("companyInfos", Schema({}, {
+            collection: "companyInfos"
+        }));
+        console.log("dbbbbbbbbbbbbbbbb")
+        flagDb.find({"cmpny_id":JSON.parse(req.params.fetchID)}).exec(callback)
+
+
+    }
 }
