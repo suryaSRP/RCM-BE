@@ -15,7 +15,7 @@ module.exports = {
         let commonFldsDb = commonDb.model("commonFlds", Schema({}, {
             collection: "commonFlds"
         }));
-        commonFldsDb.find(queryProjection.query, queryProjection.project ? queryProjection.project : {}).sort({ seq: 1 }).exec(callback)
+        commonFldsDb.find(queryProjection.getQuery, queryProjection.project ? queryProjection.project : {}).sort({ seq: 1 }).exec(callback)
     },
 
     getFldsData: (req, callback) => {

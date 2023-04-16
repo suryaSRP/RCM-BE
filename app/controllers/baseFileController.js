@@ -154,33 +154,141 @@ module.exports = {
     createActionModule: (req, res, callback) => {
         let actionCollection = req.params.pageToCreate
         let requestedBody = req.body
-        let requestedHeader=req.headers['clientsid'].split(";")
+        let requestedHeader = req.headers['clientsid'].split(";")
         let commonData = {
             "clnt_intn_id": requestedHeader[0],
-            "data_owner":requestedHeader[1]? requestedHeader[1]: "",
+            "data_owner": requestedHeader[1] ? requestedHeader[1] : "",
             "role": requestedHeader[2] ? requestedHeader[2] : 0,
+            "efcv_bgdt": new Date(),
             "efcv_endt": new Date("2999-12-31"),
-            "org_rsn_cd": "CREATED",
             "data_stat_cd": "A",
             "row_ts": new Date()
         }
         let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
         createModeDB.models = {}
-        console.log(`../models/${actionCollection}.js`,"actionCollectionURL")
+        console.log(`../models/${actionCollection}.js`, "actionCollectionURL")
         let createDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
             collection: actionCollection
         }));
-        requestedBody = {...requestedBody, ...commonData}
+        requestedBody = { ...requestedBody, ...commonData }
         console.log(requestedBody, "requestedBody_requestedBody_requestedBody_requestedBody")
         const newCreateAction = new createDB(requestedBody)
         console.log(newCreateAction, "create_new_action_DB")
-        newCreateAction.save((err,resp)=>{
-if(err){
-    console.log(err,"err_on_createMode")
-    return callback({"message":`create ${actionCollection}'s record failed`,status:"failed",data:err})
-}else{
-    return callback({"message":`create ${actionCollection}'s record sucessfully`,status:"success",data:resp})
-}
+        newCreateAction.save((err, resp) => {
+            if (err) {
+                console.log(err, "err_on_createMode")
+                return callback({ "message": `create ${actionCollection}'s record failed`, status: "failed", data: err })
+            } else {
+                return callback({ "message": `create ${actionCollection}'s record sucessfully`, status: "success", data: resp })
+            }
         })
-    }
+    },
+    deleteActionModule: (req, res, callback) => {
+        let actionCollection = req.params.collectionName
+        let requestedHeader = req.headers['clientsid'].split(";")
+        let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
+        createModeDB.models = {}
+        console.log(`../models/${actionCollection}.js`, "actionCollectionURL")
+        let deleteDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
+            collection: actionCollection
+        }));
+        const ObjectID = require('mongodb').ObjectId;
+        deleteDB.update({ _id: new ObjectID(req.params.dataId) }, {
+            $set: {
+                "data_stat_cd": "I",
+                "row_ts": new Date(),
+                "efcv_endt": new Date(),
+                "data_owner": requestedHeader[1] ? requestedHeader[1] : "",
+            }
+        }).exec((err, resp) => {
+            if (err) {
+                return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "failed", data: resp, actionPage: actionCollection })
+            } else {
+                return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "success", data: resp, actionPage: actionCollection })
+            }
+        })
+    },
+    editActionModule: (req, res, callback) => {
+        let actionCollection = req.params.collectionName
+        let requestedHeader = req.headers['clientsid'].split(";")
+        let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
+        createModeDB.models = {}
+        console.log(`../models/${actionCollection}.js`, "actionCollectionURL")
+        let editDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
+            collection: actionCollection
+        }));
+        const ObjectID = require('mongodb').ObjectId;
+        // deleteDB.update({ _id: new ObjectID(req.params.dataId) }, {
+        //     $set: {
+        //         "data_stat_cd": "I",
+        //         "row_ts": new Date(),
+        //         "efcv_endt": new Date(),
+        //         "data_owner": requestedHeader[1] ? requestedHeader[1] : "",
+        //     }
+        // }).exec((err, resp) => {
+        //     if (err) {
+        //         return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "failed", data: resp, actionPage: actionCollection })
+        //     } else {
+        //         return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "success", data: resp, actionPage: actionCollection })
+        //     }
+        // })
+    },
+    infoActionModule: (req, res, callback) => {
+        let actionCollection = req.params.collectionName
+        let requestedHeader = req.headers['clientsid'].split(";")
+        let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
+        createModeDB.models = {}
+        console.log(`../models/${actionCollection}.js`, "actionCollectionURL")
+        let infoDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
+            collection: actionCollection
+        }));
+        const ObjectID = require('mongodb').ObjectId;
+        infoDB.find({ _id: new ObjectID(req.params.dataId) }).exec((err, resp) => {
+            if (err) {
+                return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "failed", data: resp, actionPage: actionCollection })
+            } else {
+                return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "success", data: resp, actionPage: actionCollection })
+            }
+        })
+        // deleteDB.update({ _id: new ObjectID(req.params.dataId) }, {
+        //     $set: {
+        //         "data_stat_cd": "I",
+        //         "row_ts": new Date(),
+        //         "efcv_endt": new Date(),
+        //         "data_owner": requestedHeader[1] ? requestedHeader[1] : "",
+        //     }
+        // }).exec((err, resp) => {
+        //     if (err) {
+        //         return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "failed", data: resp, actionPage: actionCollection })
+        //     } else {
+        //         return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "success", data: resp, actionPage: actionCollection })
+        //     }
+        // })
+    },
+
+    updateActionModule: (req, res, callback) => {
+        let actionCollection = req.params.pageToCreate
+        let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
+        createModeDB.models = {}
+        console.log(`../models/${actionCollection}.js`, "actionCollectionURL")
+        let updateDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
+            collection: actionCollection
+        }));
+        let updatedData = req.body ? { ...JSON.parse(JSON.stringify(req.body)), ...{ "row_ts": new Date() } } : ""
+        console.log(updatedData, "updatedData._id")
+        console.log(req.params.dataId, "updatedData._idupdatedData._idupdatedData._id")
+        const ObjectID = require('mongodb').ObjectId;
+        updateDB.updateOne({ _id: ObjectID(req.params.dataId) }, {
+            $set: updatedData
+
+        }).exec((err, resp) => {
+            console.log("resprespresprespresp_updateActionModule", resp)
+            console.log("errerrerrerrerrerrerr_updateActionModule", err)
+            if (err) {
+                return callback({ "message": `updated ${actionCollection}'s record sucessfully`, status: "failed", data: resp, actionPage: actionCollection })
+            } else {
+                return callback({ "message": `updated ${actionCollection}'s record sucessfully`, status: "success", data: resp, actionPage: actionCollection })
+            }
+        })
+    },
 }

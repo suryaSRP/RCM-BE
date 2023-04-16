@@ -59,5 +59,34 @@ module.exports = {
             res.send(resp)
 
         }))
-    }
+    },
+
+    updateMode: (req, res) => {
+        baseFileController.updateActionModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "updateMode", "response received")
+            res.send(resp)
+
+        }))
+    },
+    deleteMode: (req, res) => {
+        baseFileController.deleteActionModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "deleteMode", "response received")
+            res.send(resp)
+
+        }))
+    },
+    editMode: (req, res) => {
+        baseFileController.editActionModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "deleteMode", "response received")
+            res.send(resp)
+
+        }))
+    },
+    infoMode: (req, res) => {
+        baseFileController.infoActionModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "deleteMode", "response received")
+            res.send(resp)
+
+        }))
+    },
 }
