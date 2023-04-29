@@ -13,7 +13,8 @@ module.exports = function (app) {
   app.get("/api/companyDtls", baseMiddleware.companyDocuments);
   app.get("/api/orgInfoDtls", baseMiddleware.orgInfosDocuments);
   app.get("/api/prsnMenuDtls", baseMiddleware.prsnMenuDtls);
-  app.get("/api/pstnDtls/:orgId", baseMiddleware.prsnInfoDocuments)
+  app.get("/api/pstnDtls/:orgId", baseMiddleware.pstnInfoDocuments)
+  app.get("/api/empDtls/:orgId", baseMiddleware.empInfoDocuments)
   app.get("/api/:fetchFldsForPage/fetchFlds/:getQuery", fldsMiddleware.fetchFldsForPage)
   app.get("/api/:page/:fetchID", fldsMiddleware.fetchDataForPage)
   app.post("/api/deleteData/:collectionName/:dataId", baseMiddleware.deleteMode)
@@ -24,4 +25,9 @@ module.exports = function (app) {
 //create and Update ORG, Position and Employee details  
   app.post("/api/:pageToCreate/create", baseMiddleware.createMode)
   app.post("/api/:pageToCreate/update/:dataId", baseMiddleware.updateMode)
+
+  //get Employee, postion, organization data
+  
+  app.get("/api/getDetails/formData/:fetchFldsForPage", baseMiddleware.getDetailMode);
+  app.get("/api/getDetailsBasedOnId/formData/:fetchFldsForPage/:id", baseMiddleware.getDetailOnIdBased);
 };

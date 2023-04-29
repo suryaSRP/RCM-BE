@@ -77,9 +77,10 @@ console.log("company repo hitted")
 
         let db = connectDb(req.headers['clientsid'].split(";")[0])
         db.models = {}
-        let companiesdb = db.model("personMaster", Schema({}, {
-            collection: "personMaster"
+        let personInfosdb = db.model("personInfos", Schema({}, {
+            collection: "personInfos"
         }));
-        companiesdb.find(queryProjection.query, queryProjection.project).exec(callback)
+        console.log(queryProjection.query,"queryProjection.queryqueryProjection.queryqueryProjection.query")
+        personInfosdb.find(queryProjection.query, queryProjection.project).exec(callback)
     }
 }

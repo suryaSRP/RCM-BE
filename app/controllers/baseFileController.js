@@ -234,7 +234,7 @@ module.exports = {
         // })
     },
     infoActionModule: (req, res, callback) => {
-        let actionCollection = req.params.collectionName
+        let actionCollection = (req.params.collectionName == 'employeeMaster') ? 'personInfos' : req.params.collectionName
         let requestedHeader = req.headers['clientsid'].split(";")
         let createModeDB = connectDb(req.headers['clientsid'].split(";")[0])
         createModeDB.models = {}
@@ -242,8 +242,15 @@ module.exports = {
         let infoDB = createModeDB.model(actionCollection, new Schema(require(`../models/${actionCollection}.js`), {
             collection: actionCollection
         }));
+        let query = {}
+        if (actionCollection == 'personInfos') {
+            query = { pstn_id: req.params.dataId }
+        } else {
+            query = { _id: new ObjectID(req.params.dataId) }
+        }
+        console.log(query, "queryqueryqueryquery")
         const ObjectID = require('mongodb').ObjectId;
-        infoDB.find({ _id: new ObjectID(req.params.dataId) }).exec((err, resp) => {
+        infoDB.find(query).exec((err, resp) => {
             if (err) {
                 return callback({ "message": `Delete ${actionCollection}'s record sucessfully`, status: "failed", data: resp, actionPage: actionCollection })
             } else {

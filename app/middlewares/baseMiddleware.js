@@ -1,4 +1,5 @@
 const baseFileController = require("../controllers/baseFileController")
+const commonController = require("../controllers/coreAccess.controller")
 module.exports = {
     companyDocuments: (req, res, next) => {
         req["headers"] = { clientsid: "SI01;surya@ambu.com;1" }
@@ -27,13 +28,26 @@ module.exports = {
         }))
     },
 
-    prsnInfoDocuments: (req, res, next) => {
+    pstnInfoDocuments: (req, res, next) => {
         console.log(req.params, "console.log(req.params.id);");
         req["headers"] = { clientsid: "SI01;surya@ambu.com;1" }
         console.log(req, "req_headerrrrrrrrrr")
         res["pstnMasterQuery"] = { query: { "org_unit_id": req.params.orgId, "data_stat_cd": "A" }, project: {} }
         baseFileController.pstnMasterDetails(req, res, ((err, resp) => {
-
+            if (err) {
+                console.log("Error", "baseMiddleware", "prsnInfoDocuments", err)
+                res.send(err)
+            } else {
+                res.send(resp)
+            }
+        }))
+    },
+    empInfoDocuments: (req, res, next) => {
+        console.log(req.params, "console.log(req.params.id);");
+        req["headers"] = { clientsid: "SI01;surya@ambu.com;1" }
+        console.log(req, "req_headerrrrrrrrrr")
+        res["personMasterQuery"] = { query: { "org_unit_id": req.params.orgId, "data_stat_cd": "A" }, project: {} }
+        baseFileController.personMasterDetails(req, res, ((err, resp) => {
             if (err) {
                 console.log("Error", "baseMiddleware", "prsnInfoDocuments", err)
                 res.send(err)
@@ -85,6 +99,21 @@ module.exports = {
     infoMode: (req, res) => {
         baseFileController.infoActionModule(req, res, (resp => {
             console.log("Info", "baseMiddleware", "deleteMode", "response received")
+            res.send(resp)
+
+        }))
+    },
+    getDetailMode: (req, res) => {
+        commonController.getDetailsModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "createMode", "response received")
+            res.send(resp)
+
+        }))
+    },
+    
+    getDetailOnIdBased: (req, res) => {
+        commonController.getDetailsWithIdModule(req, res, (resp => {
+            console.log("Info", "baseMiddleware", "createMode", "response received")
             res.send(resp)
 
         }))
