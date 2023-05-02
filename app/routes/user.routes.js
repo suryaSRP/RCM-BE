@@ -1,6 +1,7 @@
 const { authJwt } = require("../middlewares");
 const controller = require("../controllers/user.controller");
 const userService = require("../middlewares/userOperation.middleware");
+const programService = require("../middlewares/program.middleware");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -10,7 +11,7 @@ module.exports = function (app) {
     );
     next();
   });
-
+  
   // app.get("/api/test/all", controller.allAccess);
 
   // app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
@@ -19,5 +20,8 @@ module.exports = function (app) {
 
   // app.get("/api/test/admin", [authJwt.verifyToken, authJwt.isAdmin], controller.adminBoard);
   
-  app.post("/api/user/addUser", userService.userOperations)
+  app.post("/api/user/addUser", userService.userOperations) 
+  app.post("/api/getEmpDetails", userService.userList) 
+  app.post("/api/getEventDetails/:userId",userService.assigneDetails, programService.eventList) 
+  app.post("/api/user/addEvent", programService.eventOperations) 
 };

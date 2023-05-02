@@ -22,12 +22,14 @@ module.exports = function (app) {
   app.get("/api/info/:collectionName/:dataId", baseMiddleware.infoMode)
 
 
-//create and Update ORG, Position and Employee details  
+  //create and Update ORG, Position and Employee details  
+
+  // app.post("/api/getEmpDetails", baseMiddleware.getDetailMode);
   app.post("/api/:pageToCreate/create", baseMiddleware.createMode)
   app.post("/api/:pageToCreate/update/:dataId", baseMiddleware.updateMode)
 
   //get Employee, postion, organization data
-  
+
   app.get("/api/getDetails/formData/:fetchFldsForPage", baseMiddleware.getDetailMode);
   app.get("/api/getDetailsBasedOnId/formData/:fetchFldsForPage/:id", baseMiddleware.getDetailOnIdBased);
 };

@@ -17,7 +17,7 @@ module.exports = {
         
         let query = {
             "data_stat_cd": "A",
-            role_to_edit: req.headers['clientsid'].split(";")[2] ? parseInt(req.headers['clientsid'].split(";")[2]) : 0,
+            // role_to_edit: req.headers['clientsid'].split(";")[2] ? parseInt(req.headers['clientsid'].split(";")[2]) : 0,
             clnt_intn_id: {
                 $in: ["common", clientId]
             },

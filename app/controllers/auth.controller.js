@@ -90,7 +90,7 @@ exports.signin = (req, res) => {
   db.models = {}
   let User = db.model("Users", generic);
   User.findOne({
-    username: bodyData.userID
+    ee_id: bodyData.userID
   })
     .exec((err, userData) => {
       if (err) {
@@ -125,7 +125,8 @@ exports.signin = (req, res) => {
             username: userInput.username,
             email: userInput.email,
             roles: userInput.roles,
-            accessToken: token
+            accessToken: token,
+            ee_id:userInput.ee_id,
           }, message: "Login Success"
         });
       }

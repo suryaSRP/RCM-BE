@@ -6,5 +6,17 @@ module.exports = {
         userController.createUserController(req, res, ((resp) => {
             res.send(resp)
         }))
-    }
+    },
+    userList: (req, res, next) => {
+        userController.getUserList(req, res, ((resp) => {
+            res.send(resp)
+        }))
+    },
+    assigneDetails: (req, res, next) => {
+        console.log("assigneDetail_triggers")
+        userController.getEmpIDFromManager(req, res).then((data)=>{
+            console.log(data,"emp_empData")
+            next()
+        })
+    },
 }

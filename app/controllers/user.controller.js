@@ -86,10 +86,10 @@ module.exports = {
                 }));
                 let pstnFilter = { "pstn_id": userData.pstn_id }
                 let pstnUpdate = { 'isVacant': false }
-                console.log(pstnUpdate,"pstnUpdatepstnUpdatepstnUpdatepstnUpdate",pstnFilter)
-                positionMaster.findOneAndUpdate({ "pstn_id": userData.pstn_id }, { $set: { 'isVacant': false, row_ts: new Date() } },{ "multi": true }).exec((err, resp) => {
+                console.log(pstnUpdate, "pstnUpdatepstnUpdatepstnUpdatepstnUpdate", pstnFilter)
+                positionMaster.findOneAndUpdate({ "pstn_id": userData.pstn_id }, { $set: { 'isVacant': false, row_ts: new Date() } }, { "multi": true }).exec((err, resp) => {
                   console.log(resp, "respresprespresprespresp_positionmaster")
-                  console.log(err,"errerrerrerrerr")
+                  console.log(err, "errerrerrerrerr")
                   if (err) {
                     console.log(err, "err_on_createMode")
                     return callback({ "message": `create PersonInfos's record failed`, status: "failed", data: 'err' })
@@ -103,4 +103,75 @@ module.exports = {
         })
       })
   },
+  getUserList: (req, res, callback) => {
+
+    let empDB = connectDb(req.headers['clientsid'].split(";")[0])
+    empDB.models = {}
+    let personInfos = empDB.model("personInfos", new Schema(require(`../models/personInfos.js`), {
+      collection: 'personInfos'
+    }));
+    personInfos.aggregate([{
+      $lookup: {
+        from: "personInfos",
+        localField: "manager_id",
+        foreignField: "ee_id",
+        as: "manager"
+      }
+    }, { $unwind: "$manager" },
+    {
+      $project: {
+        _id: 0,
+        ee_id: 1,
+        frst_nm: 1,
+        last_nm: 1,
+        "emp_status": 1,
+        "manager_nm": {
+          $ifNull: ["$manager.frst_nm", ""]
+        }
+      }
+    }]).exec((err, userData) => {
+      if (err) {
+        console.log(err, "err_on_createMode")
+        return callback({ "message": `fetch PersonInfos's record failed`, status: "failed", data: 'err' })
+      } else if (userData.length) {
+        let userList = JSON.parse(JSON.stringify(userData))
+        return callback({ "message": `Fetch PersonInfos's record sucessfully`, status: "success", data: userList })
+      } else {
+        return callback({ "message": `Fetch PersonInfos's record sucessfully`, status: "success", data: [] })
+
+      }
+    })
+  },
+
+  getEmpIDFromManager: (req, res) => {
+    return new Promise(function(resolve, reject) {
+console.log("getEmpIDFromManager_triggers")
+    let empDB = connectDb(req.headers['clientsid'].split(";")[0])
+    empDB.models = {}
+    let userDB = empDB.model("personInfos", new Schema(require(`../models/personInfos.js`), {
+      collection: 'personInfos'
+    }));
+    let assigneArray = []
+    userDB.find({ 'manager_id': req.params.userId }, { ee_id: 1, _id: 0 }).exec((err, empData) => {
+      if (err) {
+
+      } else if (empData.length > 0) {
+        console.log("empData_list_found",empData)
+        let empID = JSON.parse(JSON.stringify(empData))
+        empID.forEach((element, ind, array) => {
+          assigneArray.push(element.ee_id)
+          if ((array.length) && (ind === array.length - 1)) {
+            assigneArray.push(req.params.userId)
+            req.assigneArray = assigneArray
+            resolve(req.assigneArray)
+          }
+        });
+      } else {
+        console.log("no_manage_found",empData)
+        req.assigneArray = [req.params.userId]
+        resolve(req.assigneArray)
+      }
+    })
+  })
+  }
 }
